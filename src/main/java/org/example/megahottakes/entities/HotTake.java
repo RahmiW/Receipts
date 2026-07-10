@@ -33,7 +33,4 @@ public class HotTake {
 
     @OneToMany(mappedBy = "hotTake", cascade = CascadeType.ALL,  orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();
-
-    @ManyToMany(mappedBy = "likedHotTakes")
-    private Set<User> likedByUsers = new HashSet<>();
 }

@@ -29,13 +29,6 @@ public class User {
     private Set<HotTake> hotTakes = new HashSet<>();
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL,  orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();
-    @ManyToMany
-    @JoinTable(
-            name = "user_liked_hottakes",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "hottake_id")
-    )
-    private Set<HotTake> likedHotTakes = new HashSet<>();
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL,  orphanRemoval = true)
     private Set<Follow> followingRelations = new HashSet<>();
 

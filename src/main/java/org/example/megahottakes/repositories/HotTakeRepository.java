@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface HotTakeRepository extends JpaRepository<HotTake, Long> {
-    List<HotTake> findByCreationDateAfterOrderByLikedByUsersDesc(LocalDateTime since);
+    List<HotTake> findByCreationDateAfter(LocalDateTime since);
     List<HotTake> findByContentContainingIgnoreCase(String keyword);
     List<HotTake> findByAuthorId(Long userId);
 }

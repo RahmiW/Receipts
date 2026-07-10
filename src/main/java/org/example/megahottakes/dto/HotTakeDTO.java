@@ -11,7 +11,8 @@ public class HotTakeDTO {
     private Long id;
     private String content;
     private String tag;
-    private Integer heatScore;
+    private Integer heatCount;
+    private Integer coldCount;
     private String authorName;
     private Long authorId;
     private LocalDateTime creationDate;

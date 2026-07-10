@@ -3,24 +3,33 @@ package org.example.megahottakes.services;
 import jakarta.transaction.Transactional;
 import org.example.megahottakes.dto.HotTakeDTO;
 import org.example.megahottakes.entities.HotTake;
+import org.example.megahottakes.entities.Reaction;
+import org.example.megahottakes.entities.ReactionType;
 import org.example.megahottakes.entities.User;
 import org.example.megahottakes.repositories.HotTakeRepository;
+import org.example.megahottakes.repositories.ReactionRepository;
 import org.example.megahottakes.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class HotTakeService {
+    private static final int MAX_CONTENT_LENGTH = 280;
+    private static final double FEED_GRAVITY = 1.5;
+
     private final HotTakeRepository hotTakeRepository;
     private final UserRepository userRepository;
+    private final ReactionRepository reactionRepository;
 
-    public HotTakeService(HotTakeRepository hotTakeRepository, UserRepository userRepository) {
+    public HotTakeService(HotTakeRepository hotTakeRepository, UserRepository userRepository, ReactionRepository reactionRepository) {
         this.hotTakeRepository = hotTakeRepository;
         this.userRepository = userRepository;
+        this.reactionRepository = reactionRepository;
     }
-    private static final int MAX_CONTENT_LENGTH = 280;
 
     public HotTakeDTO convertDTO(HotTake hotTake){
         HotTakeDTO hotTakeDTO = new HotTakeDTO();
@@ -28,7 +37,8 @@ public class HotTakeService {
         hotTakeDTO.setAuthorName(hotTake.getAuthor().getUserName());
         hotTakeDTO.setContent(hotTake.getContent());
         hotTakeDTO.setTag(hotTake.getTag());
-        hotTakeDTO.setHeatScore(hotTake.getLikedByUsers().size());
+        hotTakeDTO.setHeatCount(reactionRepository.countByHotTakeAndType(hotTake, ReactionType.HEAT));
+        hotTakeDTO.setColdCount(reactionRepository.countByHotTakeAndType(hotTake, ReactionType.COLD));
         hotTakeDTO.setAuthorId(hotTake.getAuthor().getId());
         hotTakeDTO.setCreationDate(hotTake.getCreationDate());
         return hotTakeDTO;
@@ -60,10 +70,17 @@ public class HotTakeService {
 
     public List<HotTakeDTO> getHotTakeFeed() {
         LocalDateTime since = LocalDateTime.now().minusHours(48);
-        List<HotTake> hotTakes = hotTakeRepository.findByCreationDateAfterOrderByLikedByUsersDesc(since);
+        List<HotTake> hotTakes = hotTakeRepository.findByCreationDateAfter(since);
         return hotTakes.stream()
+                .sorted(Comparator.comparingDouble(this::feedScore).reversed())
                 .map(this::convertDTO)
                 .toList();
+    }
+
+    private double feedScore(HotTake hotTake) {
+        int heatGained = reactionRepository.countByHotTakeAndType(hotTake, ReactionType.HEAT);
+        double hoursSincePosted = ChronoUnit.MINUTES.between(hotTake.getCreationDate(), LocalDateTime.now()) / 60.0;
+        return heatGained / Math.pow(hoursSincePosted + 2, FEED_GRAVITY);
     }
 
     public List<HotTakeDTO> getHotTakesByUser(Long userId) {
@@ -100,29 +117,25 @@ public class HotTakeService {
     public void deleteHotTake(Long hotTakeId) {
         hotTakeRepository.deleteById(hotTakeId);
     }
-    // Like HotTake logic
-    public Integer getHeatScore(Long hotTakeId) {
-        HotTake hotTake = hotTakeRepository.findById(hotTakeId).orElseThrow(() -> new IllegalArgumentException("The HotTake was not found"));
-        return hotTake.getLikedByUsers().size();
-    }
+    // React (heat/cold): tapping the same reaction again untoggles it, tapping the other switches it
     @Transactional
-    public Integer addToHeatScore(Long userId, Long hotTakeId){
+    public HotTakeDTO react(Long userId, Long hotTakeId, ReactionType type) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("The User was not Found"));
         HotTake hotTake = hotTakeRepository.findById(hotTakeId).orElseThrow(() -> new IllegalArgumentException("The HotTake was not found"));
-        if (!user.getLikedHotTakes().contains(hotTake)) {
-            user.getLikedHotTakes().add(hotTake);
-            userRepository.save(user);
-        }
-        return hotTake.getLikedByUsers().size();
-    }
-    @Transactional
-    public Integer decreaseHeatScore(Long userId, Long hotTakeId){
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("The User was not Found"));
-        HotTake hotTake = hotTakeRepository.findById(hotTakeId).orElseThrow(() -> new IllegalArgumentException("The HotTake was not found"));
-        if (user.getLikedHotTakes().contains(hotTake)) {
-            user.getLikedHotTakes().remove(hotTake);
-            userRepository.save(user);
-        }
-        return hotTake.getLikedByUsers().size();
+        reactionRepository.findByUserAndHotTake(user, hotTake).ifPresentOrElse(existing -> {
+            if (existing.getType() == type) {
+                reactionRepository.delete(existing);
+            } else {
+                existing.setType(type);
+                reactionRepository.save(existing);
+            }
+        }, () -> {
+            Reaction reaction = new Reaction();
+            reaction.setUser(user);
+            reaction.setHotTake(hotTake);
+            reaction.setType(type);
+            reactionRepository.save(reaction);
+        });
+        return convertDTO(hotTake);
     }
 }
