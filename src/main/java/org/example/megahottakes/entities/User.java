@@ -27,7 +27,6 @@ public class User {
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL,  orphanRemoval = true)
     private Set<HotTake> hotTakes = new HashSet<>();
-    // will include all the hot takes per user and adds uniqueness to each hot take
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL,  orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();
     @ManyToMany
@@ -37,31 +36,9 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "hottake_id")
     )
     private Set<HotTake> likedHotTakes = new HashSet<>();
-    // the liked hot takes will be stored here
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL,  orphanRemoval = true)
     private Set<Follow> followingRelations = new HashSet<>();
 
     @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL,  orphanRemoval = true)
     private Set<Follow> followerRelations = new HashSet<>();
-
-    public void addHotTake(HotTake take) {
-        hotTakes.add(take);
-        take.setAuthor(this);
-    }
-    public void addComment(Comment comment) {
-        comments.add(comment);
-        comment.setAuthor(this);
-    }
-    public void likeHotTake(HotTake take) {
-        likedHotTakes.add(take);
-        take.getLikedByUsers().add(this);
-    }
-    public void follow(User targetUser) {
-        Follow follow = new Follow();
-        follow.setFollower(this);
-        follow.setFollowed(targetUser);
-
-        followingRelations.add(follow);
-        targetUser.getFollowerRelations().add(follow);
-    }
 }
