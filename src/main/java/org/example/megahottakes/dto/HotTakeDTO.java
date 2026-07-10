@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public class HotTakeDTO {
     private Long id;
     private String content;
+    private String tag;
     private Integer heatScore;
     private String authorName;
     private Long authorId;

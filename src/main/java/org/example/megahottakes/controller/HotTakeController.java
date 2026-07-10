@@ -21,7 +21,7 @@ public class HotTakeController {
     // Create
     @PostMapping("/user/{id}")
     public HotTakeDTO createHotTakePost(@PathVariable Long id, @RequestBody HotTake hotTake) {
-        return hotTakeService.createHotTake(id, hotTake.getContent());
+        return hotTakeService.createHotTake(id, hotTake.getContent(), hotTake.getTag());
     }
     // Read
     @GetMapping("/{id}")
@@ -47,7 +47,7 @@ public class HotTakeController {
     // Update
     @PutMapping("/{id}")
     public HotTakeDTO updateHotTake(@PathVariable Long id, @RequestBody HotTake hotTake) {
-        return hotTakeService.updateHotTake(id, hotTake.getContent());
+        return hotTakeService.updateHotTake(id, hotTake.getContent(), hotTake.getTag());
     }
     @PatchMapping("/{hotTakeId}/like/{userId}")
     public int likeHotTake(@PathVariable Long hotTakeId, @PathVariable Long userId) {

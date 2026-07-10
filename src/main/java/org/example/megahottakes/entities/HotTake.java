@@ -22,6 +22,8 @@ public class HotTake {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    private String tag;
+
     private LocalDateTime creationDate =  LocalDateTime.now();
 
     @ManyToOne

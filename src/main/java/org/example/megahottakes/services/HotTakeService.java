@@ -20,11 +20,14 @@ public class HotTakeService {
         this.hotTakeRepository = hotTakeRepository;
         this.userRepository = userRepository;
     }
+    private static final int MAX_CONTENT_LENGTH = 280;
+
     public HotTakeDTO convertDTO(HotTake hotTake){
         HotTakeDTO hotTakeDTO = new HotTakeDTO();
         hotTakeDTO.setId(hotTake.getId());
         hotTakeDTO.setAuthorName(hotTake.getAuthor().getUserName());
         hotTakeDTO.setContent(hotTake.getContent());
+        hotTakeDTO.setTag(hotTake.getTag());
         hotTakeDTO.setHeatScore(hotTake.getLikedByUsers().size());
         hotTakeDTO.setAuthorId(hotTake.getAuthor().getId());
         hotTakeDTO.setCreationDate(hotTake.getCreationDate());
@@ -32,14 +35,18 @@ public class HotTakeService {
     }
     // Create
     @Transactional
-    public HotTakeDTO createHotTake(Long id, String contentOfHotTake) {
+    public HotTakeDTO createHotTake(Long id, String contentOfHotTake, String tag) {
         User authorOfHotTake = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("The User was not Found")); // grab id of User
         if (contentOfHotTake == null || contentOfHotTake.trim().isEmpty()) {
             throw new IllegalArgumentException("Content cannot be empty");
         }
+        if (contentOfHotTake.length() > MAX_CONTENT_LENGTH) {
+            throw new IllegalArgumentException("Content cannot exceed " + MAX_CONTENT_LENGTH + " characters");
+        }
         HotTake hotTake = new HotTake();
         hotTake.setContent(contentOfHotTake);
+        hotTake.setTag(tag);
         hotTake.setAuthor(authorOfHotTake);
         return convertDTO(hotTakeRepository.save(hotTake));
     }
@@ -75,9 +82,16 @@ public class HotTakeService {
 
     // Update
     @Transactional
-    public HotTakeDTO updateHotTake(Long hotTakeId, String newContent) {
+    public HotTakeDTO updateHotTake(Long hotTakeId, String newContent, String tag) {
         HotTake hotTake = hotTakeRepository.findById(hotTakeId).orElseThrow(() -> new IllegalArgumentException("The HotTake was not found"));
+        if (newContent == null || newContent.trim().isEmpty()) {
+            throw new IllegalArgumentException("Content cannot be empty");
+        }
+        if (newContent.length() > MAX_CONTENT_LENGTH) {
+            throw new IllegalArgumentException("Content cannot exceed " + MAX_CONTENT_LENGTH + " characters");
+        }
         hotTake.setContent(newContent);
+        hotTake.setTag(tag);
         return convertDTO(hotTakeRepository.save(hotTake));
     }
 
