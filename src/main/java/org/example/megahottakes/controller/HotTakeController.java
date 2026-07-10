@@ -5,7 +5,9 @@ import org.example.megahottakes.dto.HotTakeDTO;
 import org.example.megahottakes.entities.HotTake;
 import org.example.megahottakes.entities.ReactionType;
 import org.example.megahottakes.entities.Verdict;
+import org.example.megahottakes.services.CardService;
 import org.example.megahottakes.services.HotTakeService;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,9 +17,11 @@ import java.util.List;
 @RequestMapping("/hottakes")
 public class HotTakeController {
     private final HotTakeService hotTakeService;
+    private final CardService cardService;
 
-    public HotTakeController(HotTakeService hotTakeService) {
+    public HotTakeController(HotTakeService hotTakeService, CardService cardService) {
         this.hotTakeService = hotTakeService;
+        this.cardService = cardService;
     }
 
     // Create
@@ -54,6 +58,10 @@ public class HotTakeController {
     @PatchMapping("/{id}/verdict/{verdict}")
     public HotTakeDTO setVerdict(@PathVariable Long id, @PathVariable Verdict verdict) {
         return hotTakeService.setVerdict(id, verdict);
+    }
+    @GetMapping(value = "/{id}/card", produces = MediaType.IMAGE_PNG_VALUE)
+    public byte[] getCard(@PathVariable Long id) {
+        return cardService.generateCard(id);
     }
     // Delete
     @DeleteMapping("/{id}")
