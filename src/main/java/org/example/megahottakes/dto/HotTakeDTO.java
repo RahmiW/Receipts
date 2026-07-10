@@ -2,6 +2,7 @@ package org.example.megahottakes.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.example.megahottakes.entities.Verdict;
 
 import java.time.LocalDateTime;
 
@@ -16,4 +17,6 @@ public class HotTakeDTO {
     private String authorName;
     private Long authorId;
     private LocalDateTime creationDate;
+    private Verdict verdict;
+    private LocalDateTime resolvedDate;
 }

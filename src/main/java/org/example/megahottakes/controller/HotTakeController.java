@@ -4,6 +4,7 @@ package org.example.megahottakes.controller;
 import org.example.megahottakes.dto.HotTakeDTO;
 import org.example.megahottakes.entities.HotTake;
 import org.example.megahottakes.entities.ReactionType;
+import org.example.megahottakes.entities.Verdict;
 import org.example.megahottakes.services.HotTakeService;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,6 +50,10 @@ public class HotTakeController {
     @PatchMapping("/{hotTakeId}/react/{userId}/{type}")
     public HotTakeDTO react(@PathVariable Long hotTakeId, @PathVariable Long userId, @PathVariable ReactionType type) {
         return hotTakeService.react(userId, hotTakeId, type);
+    }
+    @PatchMapping("/{id}/verdict/{verdict}")
+    public HotTakeDTO setVerdict(@PathVariable Long id, @PathVariable Verdict verdict) {
+        return hotTakeService.setVerdict(id, verdict);
     }
     // Delete
     @DeleteMapping("/{id}")

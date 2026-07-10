@@ -6,6 +6,7 @@ import org.example.megahottakes.entities.HotTake;
 import org.example.megahottakes.entities.Reaction;
 import org.example.megahottakes.entities.ReactionType;
 import org.example.megahottakes.entities.User;
+import org.example.megahottakes.entities.Verdict;
 import org.example.megahottakes.repositories.HotTakeRepository;
 import org.example.megahottakes.repositories.ReactionRepository;
 import org.example.megahottakes.repositories.UserRepository;
@@ -41,6 +42,8 @@ public class HotTakeService {
         hotTakeDTO.setColdCount(reactionRepository.countByHotTakeAndType(hotTake, ReactionType.COLD));
         hotTakeDTO.setAuthorId(hotTake.getAuthor().getId());
         hotTakeDTO.setCreationDate(hotTake.getCreationDate());
+        hotTakeDTO.setVerdict(hotTake.getVerdict());
+        hotTakeDTO.setResolvedDate(hotTake.getResolvedDate());
         return hotTakeDTO;
     }
     // Create
@@ -101,6 +104,9 @@ public class HotTakeService {
     @Transactional
     public HotTakeDTO updateHotTake(Long hotTakeId, String newContent, String tag) {
         HotTake hotTake = hotTakeRepository.findById(hotTakeId).orElseThrow(() -> new IllegalArgumentException("The HotTake was not found"));
+        if (hotTake.getVerdict() != Verdict.PENDING) {
+            throw new IllegalArgumentException("Cannot edit a take after it has been resolved");
+        }
         if (newContent == null || newContent.trim().isEmpty()) {
             throw new IllegalArgumentException("Content cannot be empty");
         }
@@ -116,6 +122,13 @@ public class HotTakeService {
     @Transactional
     public void deleteHotTake(Long hotTakeId) {
         hotTakeRepository.deleteById(hotTakeId);
+    }
+    @Transactional
+    public HotTakeDTO setVerdict(Long hotTakeId, Verdict verdict) {
+        HotTake hotTake = hotTakeRepository.findById(hotTakeId).orElseThrow(() -> new IllegalArgumentException("The HotTake was not found"));
+        hotTake.setVerdict(verdict);
+        hotTake.setResolvedDate(verdict == Verdict.PENDING ? null : LocalDateTime.now());
+        return convertDTO(hotTakeRepository.save(hotTake));
     }
     // React (heat/cold): tapping the same reaction again untoggles it, tapping the other switches it
     @Transactional

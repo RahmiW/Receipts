@@ -26,6 +26,12 @@ public class HotTake {
 
     private LocalDateTime creationDate =  LocalDateTime.now();
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Verdict verdict = Verdict.PENDING;
+
+    private LocalDateTime resolvedDate;
+
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     @JsonIgnore
