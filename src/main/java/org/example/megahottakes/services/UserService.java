@@ -12,11 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-// Needed Methods:
-// Get hotTakes with userId
-// Get commments with userId
-// Get likedHotTakes
-
 @Service
 public class UserService {
     private final UserRepository userRepository;
