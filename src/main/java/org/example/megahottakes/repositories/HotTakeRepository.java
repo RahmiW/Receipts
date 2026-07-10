@@ -1,6 +1,5 @@
 package org.example.megahottakes.repositories;
 
-
 import org.example.megahottakes.entities.HotTake;
 import org.springframework.data.jpa.repository.JpaRepository;
 
