@@ -7,7 +7,7 @@ import org.example.megahottakes.repositories.FollowRepository;
 import org.example.megahottakes.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
-
+// Handles follow/unfollow relationships between users
 @Service
 public class FollowService {
     private final UserRepository userRepository;
@@ -16,7 +16,6 @@ public class FollowService {
         this.followRepository = followRepository;
         this.userRepository = userRepository;
     }
-    // follow logic
     @Transactional
     public void follow(Long followerId, Long followedId){
         if (followerId.equals(followedId)) {
@@ -34,7 +33,6 @@ public class FollowService {
         newFollow.setFollowed(followed);
         followRepository.save(newFollow);
     }
-    // unfollow logic
     @Transactional
     public void unfollow(Long followerId, Long followedId){
         User follower = userRepository.findById(followerId)
@@ -45,7 +43,6 @@ public class FollowService {
                 .orElseThrow(() -> new IllegalArgumentException("This relationship was not found"));
         followRepository.delete(followRelationship);
     }
-    // isFollowing checker
     public boolean isFollowing(Long followerId, Long followedId){
         User follower = userRepository.findById(followerId)
                 .orElseThrow(() -> new IllegalArgumentException("Follower was not found"));
@@ -53,7 +50,6 @@ public class FollowService {
                 .orElseThrow(() -> new IllegalArgumentException("Followed user was not found"));
         return  followRepository.existsByFollowerAndFollowed(follower, followed);
     }
-    // Methods to get list of followers and following
     public int getFollowCount(Long id){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User was not found"));
