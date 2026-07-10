@@ -10,12 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
-
-
-// Layout:
-// CRUD (Create Post and save to DB)
-// Add comment
 
 @Service
 public class HotTakeService {
