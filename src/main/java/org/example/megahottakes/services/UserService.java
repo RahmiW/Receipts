@@ -8,6 +8,7 @@ import org.example.megahottakes.entities.User;
 import org.example.megahottakes.repositories.CommentRepository;
 import org.example.megahottakes.repositories.HotTakeRepository;
 import org.example.megahottakes.repositories.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,12 +20,14 @@ public class UserService {
     private final CommentRepository commentRepository;
     private final HotTakeService hotTakeService;
     private final CommentService commentService;
-    public UserService(UserRepository userRepository,  HotTakeRepository hotTakeRepository,  CommentRepository commentRepository, HotTakeService hotTakeService,  CommentService commentService) {
+    private final PasswordEncoder passwordEncoder;
+    public UserService(UserRepository userRepository,  HotTakeRepository hotTakeRepository,  CommentRepository commentRepository, HotTakeService hotTakeService,  CommentService commentService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.hotTakeRepository = hotTakeRepository;
         this.commentRepository = commentRepository;
         this.hotTakeService = hotTakeService;
         this.commentService = commentService;
+        this.passwordEncoder = passwordEncoder;
     }
     // Convert to DTO
     private UserDTO convertDTO(User user){
@@ -40,7 +43,7 @@ public class UserService {
         if (name == null || name.isBlank()) throw new IllegalArgumentException("Username cannot be empty");
         User user = new User();
         user.setUserName(name);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         user.setBio(bioContent);
         return convertDTO(userRepository.save(user));
     }
