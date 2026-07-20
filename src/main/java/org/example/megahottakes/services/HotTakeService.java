@@ -6,21 +6,18 @@ import org.example.megahottakes.entities.HotTake;
 import org.example.megahottakes.entities.Reaction;
 import org.example.megahottakes.entities.ReactionType;
 import org.example.megahottakes.entities.User;
-import org.example.megahottakes.entities.Verdict;
 import org.example.megahottakes.repositories.HotTakeRepository;
 import org.example.megahottakes.repositories.ReactionRepository;
 import org.example.megahottakes.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
 public class HotTakeService {
     private static final int MAX_CONTENT_LENGTH = 280;
-    private static final double FEED_GRAVITY = 1.5;
 
     private final HotTakeRepository hotTakeRepository;
     private final UserRepository userRepository;
@@ -42,8 +39,8 @@ public class HotTakeService {
         hotTakeDTO.setColdCount(reactionRepository.countByHotTakeAndType(hotTake, ReactionType.COLD));
         hotTakeDTO.setAuthorId(hotTake.getAuthor().getId());
         hotTakeDTO.setCreationDate(hotTake.getCreationDate());
-        hotTakeDTO.setVerdict(hotTake.getVerdict());
-        hotTakeDTO.setResolvedDate(hotTake.getResolvedDate());
+        hotTakeDTO.setPulledByUsername(hotTake.getPulledBy() != null ? hotTake.getPulledBy().getUserName() : null);
+        hotTakeDTO.setLastResurfacedDate(hotTake.getLastResurfacedDate());
         return hotTakeDTO;
     }
     // Create
@@ -71,19 +68,13 @@ public class HotTakeService {
         return convertDTO(hotTake);
     }
 
+    // Randomized feed so low-engagement takes get the same shot at being seen as popular ones
     public List<HotTakeDTO> getHotTakeFeed() {
-        LocalDateTime since = LocalDateTime.now().minusHours(48);
-        List<HotTake> hotTakes = hotTakeRepository.findByCreationDateAfter(since);
-        return hotTakes.stream()
-                .sorted(Comparator.comparingDouble(this::feedScore).reversed())
+        List<HotTakeDTO> feed = new ArrayList<>(hotTakeRepository.findAll().stream()
                 .map(this::convertDTO)
-                .toList();
-    }
-
-    private double feedScore(HotTake hotTake) {
-        int heatGained = reactionRepository.countByHotTakeAndType(hotTake, ReactionType.HEAT);
-        double hoursSincePosted = ChronoUnit.MINUTES.between(hotTake.getCreationDate(), LocalDateTime.now()) / 60.0;
-        return heatGained / Math.pow(hoursSincePosted + 2, FEED_GRAVITY);
+                .toList());
+        Collections.shuffle(feed);
+        return feed;
     }
 
     public List<HotTakeDTO> getHotTakesByUser(Long userId) {
@@ -104,9 +95,6 @@ public class HotTakeService {
     @Transactional
     public HotTakeDTO updateHotTake(Long hotTakeId, String newContent, String tag) {
         HotTake hotTake = hotTakeRepository.findById(hotTakeId).orElseThrow(() -> new IllegalArgumentException("The HotTake was not found"));
-        if (hotTake.getVerdict() != Verdict.PENDING) {
-            throw new IllegalArgumentException("Cannot edit a take after it has been resolved");
-        }
         if (newContent == null || newContent.trim().isEmpty()) {
             throw new IllegalArgumentException("Content cannot be empty");
         }
@@ -122,13 +110,6 @@ public class HotTakeService {
     @Transactional
     public void deleteHotTake(Long hotTakeId) {
         hotTakeRepository.deleteById(hotTakeId);
-    }
-    @Transactional
-    public HotTakeDTO setVerdict(Long hotTakeId, Verdict verdict) {
-        HotTake hotTake = hotTakeRepository.findById(hotTakeId).orElseThrow(() -> new IllegalArgumentException("The HotTake was not found"));
-        hotTake.setVerdict(verdict);
-        hotTake.setResolvedDate(verdict == Verdict.PENDING ? null : LocalDateTime.now());
-        return convertDTO(hotTakeRepository.save(hotTake));
     }
     // React (heat/cold): tapping the same reaction again untoggles it, tapping the other switches it
     @Transactional

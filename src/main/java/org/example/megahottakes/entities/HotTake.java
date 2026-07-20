@@ -26,16 +26,22 @@ public class HotTake {
 
     private LocalDateTime creationDate =  LocalDateTime.now();
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Verdict verdict = Verdict.PENDING;
+    private LocalDateTime lastResurfacedDate;
 
-    private LocalDateTime resolvedDate;
+    @Column(columnDefinition = "TEXT")
+    private String resurfaceContext;
+
+    private int resurfaceCount = 0;
 
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     @JsonIgnore
     private User author;
+
+    @ManyToOne
+    @JoinColumn(name = "pulled_by_id")
+    @JsonIgnore
+    private User pulledBy;
 
     @OneToMany(mappedBy = "hotTake", cascade = CascadeType.ALL,  orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();
