@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ public class User {
     @JsonIgnore
     private String password;
     private String bio;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL,  orphanRemoval = true)
     private Set<HotTake> hotTakes = new HashSet<>();
@@ -34,4 +36,10 @@ public class User {
 
     @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL,  orphanRemoval = true)
     private Set<Follow> followerRelations = new HashSet<>();
+
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    private Set<Sport> preferredTags = new HashSet<>();
+
+    
 }
