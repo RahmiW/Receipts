@@ -2,6 +2,7 @@ package org.example.megahottakes.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.example.megahottakes.entities.Sport;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 public class HotTakeDTO {
     private Long id;
     private String content;
-    private String tag;
+    private Sport tag;
     private Integer heatCount;
     private Integer coldCount;
     private String authorName;

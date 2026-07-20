@@ -22,7 +22,8 @@ public class HotTake {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    private String tag;
+    @Enumerated(EnumType.STRING)
+    private Sport tag;
 
     private LocalDateTime creationDate =  LocalDateTime.now();
 

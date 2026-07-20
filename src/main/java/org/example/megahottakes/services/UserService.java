@@ -47,6 +47,15 @@ public class UserService {
         user.setBio(bioContent);
         return convertDTO(userRepository.save(user));
     }
+    // Auth
+    public UserDTO login(String userName, String rawPassword) {
+        User user = userRepository.findByUserName(userName)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Invalid username or password");
+        }
+        return convertDTO(user);
+    }
     // Read Section
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll()

@@ -21,11 +21,13 @@ public class ReceiptService {
     private final HotTakeRepository hotTakeRepository;
     private final UserRepository userRepository;
     private final HotTakeService hotTakeService;
+    private final NotificationService notificationService;
 
-    public ReceiptService(HotTakeRepository hotTakeRepository, UserRepository userRepository, HotTakeService hotTakeService) {
+    public ReceiptService(HotTakeRepository hotTakeRepository, UserRepository userRepository, HotTakeService hotTakeService, NotificationService notificationService) {
         this.hotTakeRepository = hotTakeRepository;
         this.userRepository = userRepository;
         this.hotTakeService = hotTakeService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -41,7 +43,10 @@ public class ReceiptService {
         hotTake.setPulledBy(puller);
         hotTake.setLastResurfacedDate(LocalDateTime.now());
         hotTake.setResurfaceCount(hotTake.getResurfaceCount() + 1);
+        HotTake resurfaced = hotTakeRepository.save(hotTake);
 
-        return hotTakeService.convertDTO(hotTakeRepository.save(hotTake));
+        notificationService.notifyBookmarkersOfResurface(resurfaced);
+
+        return hotTakeService.convertDTO(resurfaced);
     }
 }

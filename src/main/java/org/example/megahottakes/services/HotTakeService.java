@@ -5,12 +5,15 @@ import org.example.megahottakes.dto.HotTakeDTO;
 import org.example.megahottakes.entities.HotTake;
 import org.example.megahottakes.entities.Reaction;
 import org.example.megahottakes.entities.ReactionType;
+import org.example.megahottakes.entities.Sport;
 import org.example.megahottakes.entities.User;
 import org.example.megahottakes.repositories.HotTakeRepository;
 import org.example.megahottakes.repositories.ReactionRepository;
 import org.example.megahottakes.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.List;
 @Service
 public class HotTakeService {
     private static final int MAX_CONTENT_LENGTH = 280;
+    private static final int EDIT_GRACE_PERIOD_MINUTES = 10;
 
     private final HotTakeRepository hotTakeRepository;
     private final UserRepository userRepository;
@@ -45,7 +49,7 @@ public class HotTakeService {
     }
     // Create
     @Transactional
-    public HotTakeDTO createHotTake(Long id, String contentOfHotTake, String tag) {
+    public HotTakeDTO createHotTake(Long id, String contentOfHotTake, Sport tag) {
         User authorOfHotTake = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("The User was not Found")); // grab id of User
         if (contentOfHotTake == null || contentOfHotTake.trim().isEmpty()) {
@@ -93,8 +97,9 @@ public class HotTakeService {
 
     // Update
     @Transactional
-    public HotTakeDTO updateHotTake(Long hotTakeId, String newContent, String tag) {
+    public HotTakeDTO updateHotTake(Long hotTakeId, String newContent, Sport tag) {
         HotTake hotTake = hotTakeRepository.findById(hotTakeId).orElseThrow(() -> new IllegalArgumentException("The HotTake was not found"));
+        assertWithinEditGracePeriod(hotTake);
         if (newContent == null || newContent.trim().isEmpty()) {
             throw new IllegalArgumentException("Content cannot be empty");
         }
@@ -109,7 +114,16 @@ public class HotTakeService {
     // Delete
     @Transactional
     public void deleteHotTake(Long hotTakeId) {
-        hotTakeRepository.deleteById(hotTakeId);
+        HotTake hotTake = hotTakeRepository.findById(hotTakeId).orElseThrow(() -> new IllegalArgumentException("The HotTake was not found"));
+        assertWithinEditGracePeriod(hotTake);
+        hotTakeRepository.delete(hotTake);
+    }
+
+    // A take is locked from edits/deletes once the grace period for fixing typos has passed
+    private void assertWithinEditGracePeriod(HotTake hotTake) {
+        if (Duration.between(hotTake.getCreationDate(), LocalDateTime.now()).toMinutes() > EDIT_GRACE_PERIOD_MINUTES) {
+            throw new IllegalArgumentException("Cannot edit or delete a take after " + EDIT_GRACE_PERIOD_MINUTES + " minutes of posting it");
+        }
     }
     // React (heat/cold): tapping the same reaction again untoggles it, tapping the other switches it
     @Transactional
