@@ -14,8 +14,8 @@ public class ReceiptController {
         this.receiptService = receiptService;
     }
 
-    @PatchMapping("/{hotTakeId}/pull/{userId}")
-    public HotTakeDTO pullReceipt(@PathVariable Long hotTakeId, @PathVariable Long userId) {
-        return receiptService.pullReceipt(userId, hotTakeId);
+    @PatchMapping("/{hotTakeId}/pull")
+    public HotTakeDTO pullReceipt(@PathVariable Long hotTakeId, @RequestAttribute Long authUserId) {
+        return receiptService.pullReceipt(authUserId, hotTakeId);
     }
 }

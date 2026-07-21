@@ -16,18 +16,18 @@ public class BookmarkController {
         this.bookmarkService = bookmarkService;
     }
     // Create
-    @PostMapping("/{userId}/{hotTakeId}")
-    public void addBookmark(@PathVariable Long userId, @PathVariable Long hotTakeId) {
-        bookmarkService.addBookmark(userId, hotTakeId);
+    @PostMapping("/{hotTakeId}")
+    public void addBookmark(@RequestAttribute Long authUserId, @PathVariable Long hotTakeId) {
+        bookmarkService.addBookmark(authUserId, hotTakeId);
     }
     // Read
-    @GetMapping("/{userId}")
-    public List<HotTakeDTO> getBookmarksByUser(@PathVariable Long userId) {
-        return bookmarkService.getBookmarksByUser(userId);
+    @GetMapping
+    public List<HotTakeDTO> getBookmarksByUser(@RequestAttribute Long authUserId) {
+        return bookmarkService.getBookmarksByUser(authUserId);
     }
     // Delete
-    @DeleteMapping("/{userId}/{hotTakeId}")
-    public void removeBookmark(@PathVariable Long userId, @PathVariable Long hotTakeId) {
-        bookmarkService.removeBookmark(userId, hotTakeId);
+    @DeleteMapping("/{hotTakeId}")
+    public void removeBookmark(@RequestAttribute Long authUserId, @PathVariable Long hotTakeId) {
+        bookmarkService.removeBookmark(authUserId, hotTakeId);
     }
 }

@@ -2,6 +2,7 @@ package org.example.megahottakes.controller;
 
 import org.example.megahottakes.dto.CommentDTO;
 import org.example.megahottakes.dto.HotTakeDTO;
+import org.example.megahottakes.dto.LoginResponseDTO;
 import org.example.megahottakes.dto.UserDTO;
 import org.example.megahottakes.entities.User;
 import org.example.megahottakes.services.UserService;
@@ -23,7 +24,7 @@ public class UserController {
         return userService.createUser(user.getUserName(), user.getBio(), user.getPassword(), user.getPreferredTags());
     }
     @PostMapping("/login")
-    public UserDTO login(@RequestBody User user) {
+    public LoginResponseDTO login(@RequestBody User user) {
         return userService.login(user.getUserName(), user.getPassword());
     }
     // Read
@@ -51,17 +52,17 @@ public class UserController {
         return userService.getCommentsByUserId(id);
     }
     // Update Section will include: changeName, changeBio
-    @PutMapping("/{id}/username")
-    public UserDTO updateUserName(@PathVariable Long id, @RequestBody User user){
-        return userService.changeName(id, user.getUserName());
+    @PutMapping("/username")
+    public UserDTO updateUserName(@RequestAttribute Long authUserId, @RequestBody User user){
+        return userService.changeName(authUserId, user.getUserName());
     }
-    @PutMapping("/{id}/bio")
-    public UserDTO updateUserBio(@PathVariable Long id, @RequestBody User user){
-        return userService.changeBio(id, user.getBio());
+    @PutMapping("/bio")
+    public UserDTO updateUserBio(@RequestAttribute Long authUserId, @RequestBody User user){
+        return userService.changeBio(authUserId, user.getBio());
     }
     // Delete Section
-    @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id){
-        userService.deleteUser(id);
+    @DeleteMapping
+    public void deleteUser(@RequestAttribute Long authUserId){
+        userService.deleteUser(authUserId);
     }
 }

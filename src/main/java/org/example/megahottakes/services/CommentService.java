@@ -34,6 +34,9 @@ public class CommentService {
     }
     @Transactional
     public CommentDTO addComment(Long hotTakeId, Long authorId, String contentOfComment) {
+        if (contentOfComment == null || contentOfComment.trim().isEmpty()) {
+            throw new IllegalArgumentException("Content cannot be empty");
+        }
         Comment newComment = new Comment();
         HotTake hotTakeObject = hotTakeRepository.findById(hotTakeId)
                 .orElseThrow(() -> new IllegalArgumentException("The HotTake Post was not Found"));

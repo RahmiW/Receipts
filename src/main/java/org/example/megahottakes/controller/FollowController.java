@@ -13,13 +13,13 @@ public class FollowController {
         this.followService = followService;
     }
     // Create
-    @PostMapping("/{followerId}/{followedId}")
-    public void follow(@PathVariable Long followerId, @PathVariable Long followedId){
-        followService.follow(followerId, followedId);
+    @PostMapping("/{followedId}")
+    public void follow(@RequestAttribute Long authUserId, @PathVariable Long followedId){
+        followService.follow(authUserId, followedId);
     }
-    @DeleteMapping("/{followerId}/{followedId}")
-    public void unfollow(@PathVariable Long followerId, @PathVariable Long followedId){
-        followService.unfollow(followerId, followedId);
+    @DeleteMapping("/{followedId}")
+    public void unfollow(@RequestAttribute Long authUserId, @PathVariable Long followedId){
+        followService.unfollow(authUserId, followedId);
     }
     @GetMapping("/isFollowing/{followerId}/{followedId}")
     public boolean isFollowing(@PathVariable Long followerId, @PathVariable Long followedId){

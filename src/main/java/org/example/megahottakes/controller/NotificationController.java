@@ -16,9 +16,9 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-    @GetMapping("/{userId}")
-    public List<NotificationDTO> getNotifications(@PathVariable Long userId) {
-        return notificationService.getNotificationsForUser(userId);
+    @GetMapping
+    public List<NotificationDTO> getNotifications(@RequestAttribute Long authUserId) {
+        return notificationService.getNotificationsForUser(authUserId);
     }
 
     @PatchMapping("/{id}/read")

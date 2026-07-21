@@ -3,6 +3,7 @@ package org.example.megahottakes.services;
 import jakarta.transaction.Transactional;
 import org.example.megahottakes.dto.CommentDTO;
 import org.example.megahottakes.dto.HotTakeDTO;
+import org.example.megahottakes.dto.LoginResponseDTO;
 import org.example.megahottakes.dto.UserDTO;
 import org.example.megahottakes.entities.Sport;
 import org.example.megahottakes.entities.User;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -53,13 +55,17 @@ public class UserService {
         return convertDTO(userRepository.save(user));
     }
     // Auth
-    public UserDTO login(String userName, String rawPassword) {
+    @Transactional
+    public LoginResponseDTO login(String userName, String rawPassword) {
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             throw new IllegalArgumentException("Invalid username or password");
         }
-        return convertDTO(user);
+        String token = UUID.randomUUID().toString();
+        user.setSessionToken(token);
+        userRepository.save(user);
+        return new LoginResponseDTO(token, convertDTO(user));
     }
     // Read Section
     public List<UserDTO> getAllUsers() {

@@ -19,9 +19,9 @@ public class CommentController {
     }
 
     // Create
-    @PostMapping("/hottake/{hotTakeId}/user/{userId}")
-    public CommentDTO createComment(@PathVariable Long hotTakeId, @PathVariable Long userId, @RequestBody Comment comment) {
-        return commentService.addComment(hotTakeId, userId, comment.getContent());
+    @PostMapping("/hottake/{hotTakeId}")
+    public CommentDTO createComment(@PathVariable Long hotTakeId, @RequestAttribute Long authUserId, @RequestBody Comment comment) {
+        return commentService.addComment(hotTakeId, authUserId, comment.getContent());
     }
 
     // Read

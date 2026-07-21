@@ -20,9 +20,9 @@ public class HotTakeController {
     }
 
     // Create
-    @PostMapping("/user/{id}")
-    public HotTakeDTO createHotTakePost(@PathVariable Long id, @RequestBody HotTake hotTake) {
-        return hotTakeService.createHotTake(id, hotTake.getContent(), hotTake.getTag());
+    @PostMapping
+    public HotTakeDTO createHotTakePost(@RequestAttribute Long authUserId, @RequestBody HotTake hotTake) {
+        return hotTakeService.createHotTake(authUserId, hotTake.getContent(), hotTake.getTag());
     }
     // Read
     @GetMapping("/{id}")
@@ -34,8 +34,8 @@ public class HotTakeController {
         return hotTakeService.getHotTakesByUser(id);
     }
     @GetMapping("/feed")
-    public List<HotTakeDTO> hotTakeFeed(@RequestParam Long userId) {
-        return hotTakeService.getHotTakeFeed(userId);
+    public List<HotTakeDTO> hotTakeFeed(@RequestAttribute Long authUserId) {
+        return hotTakeService.getHotTakeFeed(authUserId);
     }
     @GetMapping("/search")
     public List<HotTakeDTO> searchHotTakeFeed(@RequestParam String keyword) {
@@ -46,9 +46,9 @@ public class HotTakeController {
     public HotTakeDTO updateHotTake(@PathVariable Long id, @RequestBody HotTake hotTake) {
         return hotTakeService.updateHotTake(id, hotTake.getContent(), hotTake.getTag());
     }
-    @PatchMapping("/{hotTakeId}/react/{userId}/{type}")
-    public HotTakeDTO react(@PathVariable Long hotTakeId, @PathVariable Long userId, @PathVariable ReactionType type) {
-        return hotTakeService.react(userId, hotTakeId, type);
+    @PatchMapping("/{hotTakeId}/react/{type}")
+    public HotTakeDTO react(@PathVariable Long hotTakeId, @RequestAttribute Long authUserId, @PathVariable ReactionType type) {
+        return hotTakeService.react(authUserId, hotTakeId, type);
     }
     // Delete
     @DeleteMapping("/{id}")

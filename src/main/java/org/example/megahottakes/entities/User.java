@@ -26,6 +26,8 @@ public class User {
     private String password;
     private String bio;
     private LocalDateTime createdAt = LocalDateTime.now();
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String sessionToken;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL,  orphanRemoval = true)
     private Set<HotTake> hotTakes = new HashSet<>();
