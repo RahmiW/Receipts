@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.example.megahottakes.dto.CommentDTO;
 import org.example.megahottakes.dto.HotTakeDTO;
 import org.example.megahottakes.dto.UserDTO;
+import org.example.megahottakes.entities.Sport;
 import org.example.megahottakes.entities.User;
 import org.example.megahottakes.repositories.CommentRepository;
 import org.example.megahottakes.repositories.HotTakeRepository;
@@ -11,7 +12,9 @@ import org.example.megahottakes.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -38,13 +41,15 @@ public class UserService {
         return userDTO;
     }
     // Create Section
+    // preferredTags optional; empty falls back to inferred interest, then everything
     @Transactional
-    public UserDTO createUser(String name, String bioContent, String password){
+    public UserDTO createUser(String name, String bioContent, String password, Set<Sport> preferredTags){
         if (name == null || name.isBlank()) throw new IllegalArgumentException("Username cannot be empty");
         User user = new User();
         user.setUserName(name);
         user.setPassword(passwordEncoder.encode(password));
         user.setBio(bioContent);
+        user.setPreferredTags(preferredTags != null ? preferredTags : new HashSet<>());
         return convertDTO(userRepository.save(user));
     }
     // Auth

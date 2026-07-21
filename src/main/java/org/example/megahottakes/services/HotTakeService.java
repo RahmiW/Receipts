@@ -14,14 +14,18 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class HotTakeService {
     private static final int MAX_CONTENT_LENGTH = 280;
     private static final int EDIT_GRACE_PERIOD_MINUTES = 10;
+    // Reaction count per sport to count as inferred interest
+    private static final int HEAVY_INTERACTION_THRESHOLD = 5;
 
     private final HotTakeRepository hotTakeRepository;
     private final UserRepository userRepository;
@@ -72,13 +76,36 @@ public class HotTakeService {
         return convertDTO(hotTake);
     }
 
-    // Randomized feed so low-engagement takes get the same shot at being seen as popular ones
-    public List<HotTakeDTO> getHotTakeFeed() {
-        List<HotTakeDTO> feed = new ArrayList<>(hotTakeRepository.findAll().stream()
+    // Filters by preferred sports, else inferred sports, else everything. Then ranks by heat velocity.
+    public List<HotTakeDTO> getHotTakeFeed(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("The User was not Found"));
+        Set<Sport> effectiveTags = user.getPreferredTags().isEmpty()
+                ? inferHeavilyEngagedTags(user)
+                : user.getPreferredTags();
+        return hotTakeRepository.findAll().stream()
                 .map(this::convertDTO)
-                .toList());
-        Collections.shuffle(feed);
-        return feed;
+                .filter(dto -> effectiveTags.isEmpty() || effectiveTags.contains(dto.getTag()))
+                .sorted(Comparator.comparingDouble(this::velocityScore).reversed())
+                .toList();
+    }
+
+    private Set<Sport> inferHeavilyEngagedTags(User user) {
+        Map<Sport, Long> reactionCountsByTag = reactionRepository.findByUser(user).stream()
+                .collect(Collectors.groupingBy(reaction -> reaction.getHotTake().getTag(), Collectors.counting()));
+        return reactionCountsByTag.entrySet().stream()
+                .filter(entry -> entry.getValue() >= HEAVY_INTERACTION_THRESHOLD)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+    }
+
+    // Resurfaced takes reset their decay age to compete as if freshly posted.
+    private double velocityScore(HotTakeDTO dto) {
+        LocalDateTime effectiveDate = dto.getLastResurfacedDate() != null && dto.getLastResurfacedDate().isAfter(dto.getCreationDate())
+                ? dto.getLastResurfacedDate()
+                : dto.getCreationDate();
+        double hoursSincePosted = Duration.between(effectiveDate, LocalDateTime.now()).toMinutes() / 60.0;
+        return dto.getHeatCount() / Math.pow(hoursSincePosted + 2, 1.5);
     }
 
     public List<HotTakeDTO> getHotTakesByUser(Long userId) {

@@ -6,9 +6,11 @@ import org.example.megahottakes.entities.ReactionType;
 import org.example.megahottakes.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ReactionRepository extends JpaRepository<Reaction, Long> {
     Optional<Reaction> findByUserAndHotTake(User user, HotTake hotTake);
     int countByHotTakeAndType(HotTake hotTake, ReactionType type);
+    List<Reaction> findByUser(User user);
 }

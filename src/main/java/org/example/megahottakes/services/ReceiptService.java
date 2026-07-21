@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-// Handles pulling receipts on a take: eligibility, resurfacing, and crediting whoever pulled it.
-// The actual truth-check (AI + web search) is a later addition - a pull here is treated as
-// succeeding once it's eligible, which is what drives the take resurfacing in the feed.
+// Pull eligibility, resurfacing, and crediting. Truth-check via AI/web search comes later.
 @Service
 public class ReceiptService {
     private static final int PULL_RECEIPT_MIN_HOURS = 2;

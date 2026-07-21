@@ -34,8 +34,8 @@ public class HotTakeController {
         return hotTakeService.getHotTakesByUser(id);
     }
     @GetMapping("/feed")
-    public List<HotTakeDTO> hotTakeFeed() {
-        return hotTakeService.getHotTakeFeed();
+    public List<HotTakeDTO> hotTakeFeed(@RequestParam Long userId) {
+        return hotTakeService.getHotTakeFeed(userId);
     }
     @GetMapping("/search")
     public List<HotTakeDTO> searchHotTakeFeed(@RequestParam String keyword) {

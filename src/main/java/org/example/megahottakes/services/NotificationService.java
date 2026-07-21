@@ -11,8 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-// Creates in-app notification records for bookmarkers when a take they bookmarked resurfaces.
-// Actual push/email delivery is a later feature - this just makes the "who needs to be told" data real.
+// Creates in-app notification records when a bookmarked take resurfaces. Push/email delivery is later.
 @Service
 public class NotificationService {
     private final NotificationRepository notificationRepository;

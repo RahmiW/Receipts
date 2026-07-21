@@ -20,7 +20,7 @@ public class UserController {
     // Create
     @PostMapping
     public UserDTO createUser(@RequestBody User user) {
-        return userService.createUser(user.getUserName(), user.getBio(),user.getPassword());
+        return userService.createUser(user.getUserName(), user.getBio(), user.getPassword(), user.getPreferredTags());
     }
     @PostMapping("/login")
     public UserDTO login(@RequestBody User user) {
