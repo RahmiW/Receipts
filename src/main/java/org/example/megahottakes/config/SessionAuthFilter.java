@@ -26,6 +26,9 @@ public class SessionAuthFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         String method = request.getMethod();
+        if ("OPTIONS".equals(method)) {
+            return true;
+        }
         boolean isSignup = "POST".equals(method) && "/users".equals(path);
         boolean isLogin = "POST".equals(method) && "/users/login".equals(path);
         return isSignup || isLogin;
