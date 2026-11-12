@@ -35,18 +35,6 @@ public class NotificationService {
         return dto;
     }
 
-    @Transactional
-    public void notifyBookmarkersOfResurface(HotTake hotTake) {
-        List<Bookmark> bookmarks = bookmarkRepository.findByHotTakeId(hotTake.getId());
-        for (Bookmark bookmark : bookmarks) {
-            Notification notification = new Notification();
-            notification.setRecipient(bookmark.getUser());
-            notification.setHotTake(hotTake);
-            notification.setMessage("A take you bookmarked just had its receipts pulled and resurfaced.");
-            notificationRepository.save(notification);
-        }
-    }
-
     public List<NotificationDTO> getNotificationsForUser(Long userId) {
         return notificationRepository.findByRecipientIdOrderByCreatedDateDesc(userId)
                 .stream()
