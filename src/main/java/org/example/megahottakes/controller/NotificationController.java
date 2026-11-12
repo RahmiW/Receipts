@@ -25,4 +25,9 @@ public class NotificationController {
     public void markAsRead(@PathVariable Long id) {
         notificationService.markAsRead(id);
     }
+    
+    @GetMapping("/unread-count")
+    public int getUnreadCount(@RequestAttribute Long authUserId){
+        return notificationService.getUnreadCount(authUserId);
+    }
 }
