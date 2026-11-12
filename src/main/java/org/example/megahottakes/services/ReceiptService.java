@@ -43,7 +43,7 @@ public class ReceiptService {
         hotTake.setResurfaceCount(hotTake.getResurfaceCount() + 1);
         HotTake resurfaced = hotTakeRepository.save(hotTake);
 
-        notificationService.notifyBookmarkersOfResurface(resurfaced);
+        notificationService.notifyBookmarkersOfResurface(resurfaced, puller);
 
         return hotTakeService.convertDTO(resurfaced);
     }
