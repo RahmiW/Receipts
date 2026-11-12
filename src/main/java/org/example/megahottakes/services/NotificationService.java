@@ -10,6 +10,7 @@ import org.example.megahottakes.entities.Notification;
 import org.example.megahottakes.repositories.BookmarkRepository;
 import org.example.megahottakes.repositories.NotificationRepository;
 import org.springframework.stereotype.Service;
+import org.example.megahottakes.exceptions.UnauthorizedException;
 
 import jakarta.transaction.Transactional;
 
@@ -43,9 +44,12 @@ public class NotificationService {
     }
 
     @Transactional
-    public void markAsRead(Long notificationId) {
+    public void markAsRead(Long notificationId, Long userId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new IllegalArgumentException("The Notification was not found"));
+        if (!notification.getRecipient().getId().equals(userId)) {
+        throw new UnauthorizedException("You can only mark your own notifications as read");
+        }
         notification.setRead(true);
         notificationRepository.save(notification);
     }
