@@ -19,4 +19,5 @@ public class HotTakeDTO {
     private LocalDateTime creationDate;
     private String pulledByUsername;
     private LocalDateTime lastResurfacedDate;
+    private Integer bookmarkCount;
 }
