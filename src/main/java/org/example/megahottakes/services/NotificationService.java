@@ -3,7 +3,7 @@ package org.example.megahottakes.services;
 import java.util.List;
 
 import org.example.megahottakes.dto.NotificationDTO;
-
+import org.example.megahottakes.entities.User;
 import org.example.megahottakes.entities.Bookmark;
 import org.example.megahottakes.entities.HotTake;
 import org.example.megahottakes.entities.Notification;
