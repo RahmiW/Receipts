@@ -11,7 +11,7 @@ import org.example.megahottakes.repositories.HotTakeRepository;
 import org.example.megahottakes.repositories.ReactionRepository;
 import org.example.megahottakes.repositories.UserRepository;
 import org.springframework.stereotype.Service;
-
+import org.example.megahottakes.repositories.BookmarkRepository;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -30,11 +30,13 @@ public class HotTakeService {
     private final HotTakeRepository hotTakeRepository;
     private final UserRepository userRepository;
     private final ReactionRepository reactionRepository;
+    private final BookmarkRepository bookmarkRepository;
 
-    public HotTakeService(HotTakeRepository hotTakeRepository, UserRepository userRepository, ReactionRepository reactionRepository) {
+    public HotTakeService(HotTakeRepository hotTakeRepository, UserRepository userRepository, ReactionRepository reactionRepository, BookmarkRepository bookmarkRepository) {
         this.hotTakeRepository = hotTakeRepository;
         this.userRepository = userRepository;
         this.reactionRepository = reactionRepository;
+        this.bookmarkRepository = bookmarkRepository;
     }
 
     public HotTakeDTO convertDTO(HotTake hotTake){
@@ -49,6 +51,7 @@ public class HotTakeService {
         hotTakeDTO.setCreationDate(hotTake.getCreationDate());
         hotTakeDTO.setPulledByUsername(hotTake.getPulledBy() != null ? hotTake.getPulledBy().getUserName() : null);
         hotTakeDTO.setLastResurfacedDate(hotTake.getLastResurfacedDate());
+        hotTakeDTO.setBookmarkCount(bookmarkRepository.countByHotTakeId(hotTake.getId()));
         return hotTakeDTO;
     }
     // Create
