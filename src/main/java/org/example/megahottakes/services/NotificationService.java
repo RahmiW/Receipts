@@ -1,7 +1,9 @@
 package org.example.megahottakes.services;
 
-import jakarta.transaction.Transactional;
+import java.util.List;
+
 import org.example.megahottakes.dto.NotificationDTO;
+
 import org.example.megahottakes.entities.Bookmark;
 import org.example.megahottakes.entities.HotTake;
 import org.example.megahottakes.entities.Notification;
@@ -9,7 +11,7 @@ import org.example.megahottakes.repositories.BookmarkRepository;
 import org.example.megahottakes.repositories.NotificationRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import jakarta.transaction.Transactional;
 
 // Creates in-app notification records when a bookmarked take resurfaces. Push/email delivery is later.
 @Service
@@ -63,4 +65,19 @@ public class NotificationService {
     public int getUnreadCount(Long userID){
         return notificationRepository.countByRecipientIdAndReadFalse(userID);
     }
+
+    @Transactional
+    public void notifyBookmarkersOfResurface(HotTake hotTake, User puller) {
+        List<Bookmark> bookmarks = bookmarkRepository.findByHotTakeId(hotTake.getId());
+        for (Bookmark bookmark : bookmarks) {
+            if (bookmark.getUser().getId().equals(puller.getId())) {
+            continue; // don't notify the person who pulled it
+        }
+        Notification notification = new Notification();
+        notification.setRecipient(bookmark.getUser());
+        notification.setHotTake(hotTake);
+        notification.setMessage(puller.getUserName() + " pulled the receipts on a take you bookmarked and it resurfaced.");
+        notificationRepository.save(notification);
+    }
+}
 }
